@@ -1,0 +1,41 @@
+#Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: javawebDeployment
+spec:
+  replicas: 2
+  strategy:
+    type: Rollingupdate
+    Rollingupdate:
+      maxSurge: 1
+      maxUnavilable: 1
+  minReadyseconds: 60
+  selector:
+    matchLabels:
+      app: java
+  template:
+    metadata:
+      name: javapod
+      labels:
+        app: java
+    spec:
+      Containers:
+      - name: Javawebappcontainer
+        image: dockeruma03/java-web-app:1
+        Ports:
+        - ContainerPort: 8080
+---
+#Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: javasvc
+spec:
+  type: NodePort
+  selector:
+    app: java
+  ports:
+  - port: 80
+    targetPort: 8080
+    nodePort: 32767

@@ -1,0 +1,14 @@
+#Pod
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: java-pod
+  labels:
+    app: java
+spec:
+  containers:
+    - name: java-container
+      image: dockeruma03/java-web-app:1
+      ports:
+      - containerPort: 8080

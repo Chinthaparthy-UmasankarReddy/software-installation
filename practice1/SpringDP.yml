@@ -1,0 +1,93 @@
+#Springapp webapp
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springappdeployment
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailabe: 1
+      maxSurge: 1
+  minReadySecondes: 1
+  selector:
+    matchLabels:
+      app: springapp
+  template:
+    metadata:
+      name: springapppod
+      labels:
+        app: springapp
+        version: one
+   spec:
+     containers:
+     - name: pringappcontainer
+       image: uma03/springapp:1
+       ports:
+       - containerPort: 8080
+       env:
+       - name: MONGO_DB_HOSTNAME
+         value: mongosvc
+       - name: MONGO_DB_USERNAME
+         value: devdb
+       - name: MONGO_DB_PASSWORD
+         value: devdb@123
+---
+
+#Service of NodePort for frintend
+apiVersion: v1
+kind: Service
+metadata:
+  name: springappsvc
+spec:
+  type: NodePort
+  selector:
+    app: Springapp
+    version: one
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+
+#mongodb database
+apiVersion: apps/v1
+kind: Replicaset
+matadata:
+  name: mongodbrs
+spec:
+  replicas: 2
+  selector:
+    matchLables:
+      app: mango
+  template:
+    matadata:
+      name: mongopod
+      labels:
+        app: mongo
+    spec:
+      containers:
+      - name: mongo-container
+        image: mango
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INIT_ROOT_USERNAME
+          value: devdb
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          value: devdb@123
+---
+
+#Service of ClusterIP for mongodb
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongosvc
+spec:
+  type: ClusterIP
+  selector:
+    app: mango
+  ports:
+  - port: 27017
+    targetPort: 27017
+---

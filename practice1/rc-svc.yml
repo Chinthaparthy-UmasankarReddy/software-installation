@@ -1,0 +1,35 @@
+#Replication controller
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: javaRc
+spec:
+  replicas: 2
+  selector:
+    app: java
+  template:
+    metadata:
+      name: javawebapp
+      labels:
+        app: java
+    spec:
+      Containers:
+       - name: javawebapp container
+         image: uma03/java-web-app:1
+         ports:
+         - ContainerPort: 8080
+
+---
+#Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: javasvc
+spec:
+  type: NodePort
+  selector:
+    app: java
+  ports:
+  - port: 80
+    targetPort: 8080
+    nodePort: 30076

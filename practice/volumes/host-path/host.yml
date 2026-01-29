@@ -1,0 +1,101 @@
+---
+# MongoDB ReplicaSet with Host Volume
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: mongodbrs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:7.0
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: devdb
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          value: devdb123
+        - name: MONGO_INITDB_DATABASE
+          value: myappdb
+        volumeMounts:
+        - name: mongo-host-storage
+          mountPath: /data/db
+      volumes:
+      - name: mongo-host-storage
+        hostPath:
+          path: /mnt/mongo-data/uma  # Host directory on node
+          type: DirectoryOrCreate
+
+---
+# MongoDB Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongosvc
+spec:
+  type: ClusterIP
+  selector:
+    app: mongo
+  ports:
+  - port: 27017
+    targetPort: 27017
+
+---
+# Spring Boot Deployment - Individual ENV vars
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springappdeployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: springapp
+  template:
+    metadata:
+      labels:
+        app: springapp
+    spec:
+      containers:
+      - name: springapp
+        image: dockeruma03/spring-boot-mongo:1
+        ports:
+        - containerPort: 8080
+        env:
+        # Standard Spring Boot MongoDB env vars
+        - name: SPRING_DATA_MONGODB_HOST
+          value: mongosvc
+        - name: SPRING_DATA_MONGODB_PORT
+          value: "27017"
+        - name: SPRING_DATA_MONGODB_USERNAME
+          value: devdb
+        - name: SPRING_DATA_MONGODB_PASSWORD
+          value: devdb123
+        - name: SPRING_DATA_MONGODB_DATABASE
+          value: myappdb
+        - name: SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE
+          value: admin
+
+---
+# Spring Boot Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: springappsvc
+spec:
+  type: NodePort
+  selector:
+    app: springapp
+  ports:
+  - port: 80
+    targetPort: 8080
+    nodePort: 32577

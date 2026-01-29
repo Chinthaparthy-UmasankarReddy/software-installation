@@ -1,0 +1,13 @@
+#Nodeport Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: javasvc
+spec:
+  type: NodePort
+  selector:
+    app: java
+  ports:
+  - port: 80
+    targetPort: 8080
+    nodePort: 30076

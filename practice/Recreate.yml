@@ -1,0 +1,36 @@
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: javawebapp-deployment
+spec:
+  replicas: 2
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: java
+  template:
+    metadata:
+      labels:
+        app: java
+    spec:
+      containers:
+        - name: javawebapp-container
+          image: dockeruma03/java-web-apps:1
+          ports:
+            - containerPort: 8080
+
+---
+# ClusterIP Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: javasvc
+spec:
+  type: NodePort
+  selector:
+    app: java
+  ports:
+    - port: 80
+      targetPort: 8080
