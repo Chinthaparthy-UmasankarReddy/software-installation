@@ -133,4 +133,44 @@ Since you are deploying to **AWS EKS**, ensure you have a `.gitignore` file that
 * `*.tfstate` (Sensitive state files)
 * `node_modules/` or target folders (Language-specific build artifacts)
 * `.env` (Secrets/Credentials)
+To clone a specific branch without downloading the entire history of every other branch, you have two main options depending on whether you want just that branch or the ability to switch to others later.
+
+---
+
+## 1. The Standard Way (Get the branch + everything else)
+This is the most common method. It clones the whole repository but automatically "checks out" the specific branch you want so you can start working immediately.
+
+```bash
+git clone -b <branch_name> <repository_url>
+```
+* **Example:** `git clone -b feature-shopping-cart https://github.com/Chinthaparthy-UmasankarReddy/k8s-5microservices-ecommerce-app.git`
+
+---
+
+## 2. The "Lightweight" Way (Single Branch Only)
+If you are working on a massive project (like a microservices repo with huge history) and you **only** care about one branch, use the `--single-branch` flag. This saves disk space and download time because it ignores all other branches.
+
+```bash
+git clone -b <branch_name> --single-branch <repository_url>
+```
+* **Use Case:** Perfect for **CI/CD pipelines** (like your Jenkins setup) where you only need the code for a specific deployment and don't want to waste 8GB of RAM or bandwidth on the rest.
+
+---
+
+## 3. What if you already cloned the repo?
+If you've already run `git clone` and realized you're on `main` but need to be on a different branch that exists on GitHub:
+
+1.  **Fetch the updates**: 
+    `git fetch origin`
+2.  **Switch to the branch**: 
+    `git checkout <branch_name>`
+
+---
+
+## ⚠️ A Note for your EKS Project
+Since you are dealing with **5 microservices**, you might have branches named after environments (e.g., `dev`, `staging`, `prod`) or specific services (e.g., `auth-service`, `payment-service`). 
+
+
+
+If you are setting up a Jenkins agent to deploy just the **Payment Service**, using the `--single-branch` method is the most efficient way to keep your Jenkins workspace clean and fast.
 
